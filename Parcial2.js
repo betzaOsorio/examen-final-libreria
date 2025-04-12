@@ -69,199 +69,199 @@ Crear una función para guardar el catálogo en un archivo (fs.writeFileSync).
 Agregar una opción para filtrar libros por autor.
 */
 
-const fs = require('fs');
-const chalk = require('chalk');
-const readline = require('readline');
-const colors = require('colors');
-const rl = readline.createInterface({
+const fileSystem = require('fs');
+const estilos = require('chalk');
+const entradaSalida = require('readline');
+const paleta = require('colors');
+const interfaz = entradaSalida.createInterface({
     input: process.stdin,
     output: process.stdout
 });
 
-const catalogo = [];
+const listadoLibros = [];
 
-function preguntar(pregunta) {
-    return new Promise((resolve) => {
-        rl.question(pregunta, (respuesta) => {
-            resolve(respuesta);
+function solicitarDato(consulta) {
+    return new Promise((resolver) => {
+        interfaz.question(consulta, (entradaUsuario) => {
+            resolver(entradaUsuario);
         });
     });
 }
 
-function mostrarMenu() {
-    console.log(chalk.blue('\nBienvenido al sistema de gestión de libros "El Rincón del Saber"'));
-    console.log(chalk.green('1. Agregar libro'));
-    console.log(chalk.green('2. Mostrar catálogo'));
-    console.log(chalk.green('3. Buscar libro por título'));
-    console.log(chalk.green('4. Eliminar libro'));
-    console.log(chalk.green('5. Ver estadísticas'));
-    console.log(chalk.green('6. Ordenar libros'));
-    console.log(chalk.green('7. Editar libro'));
-    console.log(chalk.red('8. Salir'));
+function presentarOpciones() {
+    console.log(estilos.blue('\nSistema de administración bibliográfica "Letras y Saberes"'));
+    console.log(estilos.green('1. Registrar nuevo libro'));
+    console.log(estilos.green('2. Visualizar todos los libros'));
+    console.log(estilos.green('3. Encontrar libro específico'));
+    console.log(estilos.green('4. Quitar libro del sistema'));
+    console.log(estilos.green('5. Consultar métricas'));
+    console.log(estilos.green('6. Organizar colección'));
+    console.log(estilos.green('7. Modificar datos de libro'));
+    console.log(estilos.red('8. Finalizar programa'));
 }
 
-async function agregarLibro() {
-    const titulo = await preguntar('Ingrese el título del libro: ');
-    const autor = await preguntar('Ingrese el autor del libro: ');
-    const precio = parseFloat(await preguntar('Ingrese el precio del libro: '));
-    const anio = parseInt(await preguntar('Ingrese el año de publicación: '));
+async function registrarLibro() {
+    const nombreObra = await solicitarDato('Proporcione el nombre del libro: ');
+    const escritor = await solicitarDato('Indique el autor: ');
+    const valor = parseFloat(await solicitarDato('Introduzca el valor monetario: '));
+    const fechaPublicacion = parseInt(await solicitarDato('Año de edición: '));
 
-    if (isNaN(precio) || precio <= 0) {
-        console.log(chalk.red('El precio debe ser un número positivo.'));
+    if (isNaN(valor) || valor <= 0) {
+        console.log(estilos.red('El valor debe ser numérico y mayor a cero.'));
         return;
     }
 
-    const libro = { titulo, autor, precio, anio };
-    catalogo.push(libro);
-    console.log(chalk.green('Libro agregado correctamente.'));
+    const nuevoRegistro = { nombreObra, escritor, valor, fechaPublicacion };
+    listadoLibros.push(nuevoRegistro);
+    console.log(estilos.green('Libro registrado satisfactoriamente.'));
 }
 
-function mostrarCatalogo() {
-    if (catalogo.length === 0) {
-        console.log(chalk.yellow('No hay libros en el catálogo.'));
+function exhibirColeccion() {
+    if (listadoLibros.length === 0) {
+        console.log(estilos.yellow('La colección está vacía actualmente.'));
         return;
     }
 
-    console.log(chalk.blue('Catálogo de libros:'));
-    catalogo.forEach((libro, index) => {
-        console.log(chalk.cyan(`${index + 1}. Título: ${libro.titulo}, Autor: ${libro.autor}, Precio: $${libro.precio}, Año: ${libro.anio}`));
+    console.log(estilos.blue('Registros bibliográficos:'));
+    listadoLibros.forEach((ejemplar, posicion) => {
+        console.log(estilos.cyan(`${posicion + 1}. Obra: ${ejemplar.nombreObra}, Creador: ${ejemplar.escritor}, Costo: $${ejemplar.valor}, Publicación: ${ejemplar.fechaPublicacion}`));
     });
 }
 
-async function buscarLibroPorTitulo() {
-    const titulo = await preguntar('Ingrese el título del libro a buscar: ');
-    const libro = catalogo.find(libro => libro.titulo.toLowerCase() === titulo.toLowerCase());
+async function localizarLibro() {
+    const busqueda = await solicitarDato('Escriba el título a buscar: ');
+    const resultado = listadoLibros.find(ejemplar => ejemplar.nombreObra.toLowerCase() === busqueda.toLowerCase());
 
-    if (libro) {
-        console.log(chalk.blue(`Libro encontrado: Título: ${libro.titulo}, Autor: ${libro.autor}, Precio: $${libro.precio}, Año: ${libro.anio}`));
+    if (resultado) {
+        console.log(estilos.blue(`Resultado encontrado: Obra: ${resultado.nombreObra}, Autor: ${resultado.escritor}, Valor: $${resultado.valor}, Año: ${resultado.fechaPublicacion}`));
     } else {
-        console.log(chalk.red('Libro no encontrado.'));
+        console.log(estilos.red('No se encontró coincidencia.'));
     }
 }
 
-async function eliminarLibro() {
-    const titulo = await preguntar('Ingrese el título del libro a eliminar: ');
-    const indice = catalogo.findIndex(libro => libro.titulo.toLowerCase() === titulo.toLowerCase());
+async function removerLibro() {
+    const busqueda = await solicitarDato('Indique el título a eliminar: ');
+    const indiceRegistro = listadoLibros.findIndex(ejemplar => ejemplar.nombreObra.toLowerCase() === busqueda.toLowerCase());
 
-    if (indice !== -1) {
-        catalogo.splice(indice, 1);
-        console.log(chalk.green('Libro eliminado correctamente.'));
+    if (indiceRegistro !== -1) {
+        listadoLibros.splice(indiceRegistro, 1);
+        console.log(estilos.green('Registro eliminado con éxito.'));
     } else {
-        console.log(chalk.red('Libro no encontrado.'));
+        console.log(estilos.red('No existe ese título en la colección.'));
     }
 }
 
-function verEstadisticas() {
-    if (catalogo.length === 0) {
-        console.log(chalk.yellow('No hay libros en el catálogo.'));
+function calcularMetricas() {
+    if (listadoLibros.length === 0) {
+        console.log(estilos.yellow('No hay registros para analizar.'));
         return;
     }
 
-    const totalLibros = catalogo.length;
-    const precioPromedio = catalogo.reduce((sum, libro) => sum + libro.precio, 0) / totalLibros;
-    const libroMasAntiguo = catalogo.reduce((a, b) => (a.anio < b.anio ? a : b));
-    const libroMasCaro = catalogo.reduce((a, b) => (a.precio > b.precio ? a : b));
+    const cantidadTotal = listadoLibros.length;
+    const promedioValores = listadoLibros.reduce((acumulador, ejemplar) => acumulador + ejemplar.valor, 0) / cantidadTotal;
+    const obraMasAntigua = listadoLibros.reduce((a, b) => (a.fechaPublicacion < b.fechaPublicacion ? a : b));
+    const obraMasCostosa = listadoLibros.reduce((a, b) => (a.valor > b.valor ? a : b));
 
-    console.log(chalk.blue(`Cantidad total de libros: ${totalLibros}`));
-    console.log(chalk.blue(`Precio promedio: $${precioPromedio.toFixed(2)}`));
-    console.log(chalk.blue(`Libro más antiguo: Título: ${libroMasAntiguo.titulo}, Autor: ${libroMasAntiguo.autor}, Año: ${libroMasAntiguo.anio}`));
-    console.log(chalk.blue(`Libro más caro: Título: ${libroMasCaro.titulo}, Autor: ${libroMasCaro.autor}, Precio: $${libroMasCaro.precio}`));
+    console.log(estilos.blue(`Total de obras registradas: ${cantidadTotal}`));
+    console.log(estilos.blue(`Valor promedio: $${promedioValores.toFixed(2)}`));
+    console.log(estilos.blue(`Publicación más antigua: Obra: ${obraMasAntigua.nombreObra}, Autor: ${obraMasAntigua.escritor}, Año: ${obraMasAntigua.fechaPublicacion}`));
+    console.log(estilos.blue(`Obra de mayor valor: Obra: ${obraMasCostosa.nombreObra}, Autor: ${obraMasCostosa.escritor}, Precio: $${obraMasCostosa.valor}`));
 }
 
-async function ordenarLibros() {
-    console.log(chalk.blue('¿Cómo desea ordenar los libros?'));
-    console.log(chalk.green('1. Por precio (ascendente)'));
-    console.log(chalk.green('2. Por precio (descendente)'));
-    console.log(chalk.green('3. Por año de publicación'));
+async function reorganizarColeccion() {
+    console.log(estilos.blue('Seleccione el criterio de ordenamiento:'));
+    console.log(estilos.green('1. Valor (menor a mayor)'));
+    console.log(estilos.green('2. Valor (mayor a menor)'));
+    console.log(estilos.green('3. Fecha de publicación'));
 
-    const opcion = parseInt(await preguntar('Ingrese su opción: '));
+    const seleccion = parseInt(await solicitarDato('Elija una opción numérica: '));
 
-    switch (opcion) {
+    switch (seleccion) {
         case 1:
-            catalogo.sort((a, b) => a.precio - b.precio);
-            console.log(chalk.green('Libros ordenados por precio (ascendente).'));
+            listadoLibros.sort((a, b) => a.valor - b.valor);
+            console.log(estilos.green('Colección ordenada por valor ascendente.'));
             break;
         case 2:
-            catalogo.sort((a, b) => b.precio - a.precio);
-            console.log(chalk.green('Libros ordenados por precio (descendente).'));
+            listadoLibros.sort((a, b) => b.valor - a.valor);
+            console.log(estilos.green('Colección ordenada por valor descendente.'));
             break;
         case 3:
-            catalogo.sort((a, b) => a.anio - b.anio);
-            console.log(chalk.green('Libros ordenados por año de publicación.'));
+            listadoLibros.sort((a, b) => a.fechaPublicacion - b.fechaPublicacion);
+            console.log(estilos.green('Colección ordenada cronológicamente.'));
             break;
         default:
-            console.log(chalk.red('Opción no válida.'));
+            console.log(estilos.red('Opción incorrecta.'));
     }
 }
 
-async function editarLibro() {
-    const titulo = await preguntar('Ingrese el título del libro a editar: ');
-    const libro = catalogo.find(libro => libro.titulo.toLowerCase() === titulo.toLowerCase());
+async function actualizarRegistro() {
+    const busqueda = await solicitarDato('Título del libro a modificar: ');
+    const registroExistente = listadoLibros.find(ejemplar => ejemplar.nombreObra.toLowerCase() === busqueda.toLowerCase());
 
-    if (libro) {
-        const nuevoTitulo = await preguntar('Ingrese el nuevo título (deje vacío para no modificar): ');
-        const nuevoAutor = await preguntar('Ingrese el nuevo autor (deje vacío para no modificar): ');
-        const precioInput = await preguntar('Ingrese el nuevo precio (deje vacío para no modificar): ');
-        const anioInput = await preguntar('Ingrese el nuevo año de publicación (deje vacío para no modificar): ');
+    if (registroExistente) {
+        const tituloActualizado = await solicitarDato('Nuevo título (opcional): ');
+        const autorActualizado = await solicitarDato('Nuevo autor (opcional): ');
+        const valorInput = await solicitarDato('Nuevo valor (opcional): ');
+        const fechaInput = await solicitarDato('Nuevo año (opcional): ');
 
-        const nuevoPrecio = parseFloat(precioInput);
-        const nuevoAnio = parseInt(anioInput);
+        const nuevoValor = parseFloat(valorInput);
+        const nuevaFecha = parseInt(fechaInput);
 
-        if (nuevoTitulo) libro.titulo = nuevoTitulo;
-        if (nuevoAutor) libro.autor = nuevoAutor;
-        if (!isNaN(nuevoPrecio) && nuevoPrecio > 0) libro.precio = nuevoPrecio;
-        if (!isNaN(nuevoAnio)) libro.anio = nuevoAnio;
+        if (tituloActualizado) registroExistente.nombreObra = tituloActualizado;
+        if (autorActualizado) registroExistente.escritor = autorActualizado;
+        if (!isNaN(nuevoValor) && nuevoValor > 0) registroExistente.valor = nuevoValor;
+        if (!isNaN(nuevaFecha)) registroExistente.fechaPublicacion = nuevaFecha;
 
-        console.log(chalk.green('Libro editado correctamente.'));
+        console.log(estilos.green('Cambios aplicados correctamente.'));
     } else {
-        console.log(chalk.red('Libro no encontrado.'));
+        console.log(estilos.red('No se encontró el libro especificado.'));
     }
 }
 
-function guardarCatalogo() {
-    fs.writeFileSync('catalogo.json', JSON.stringify(catalogo, null, 2));
-    console.log(chalk.green('Catálogo guardado en catalogo.json'));
+function respaldarDatos() {
+    fileSystem.writeFileSync('registros.json', JSON.stringify(listadoLibros, null, 2));
+    console.log(estilos.green('Datos almacenados en registros.json'));
 }
 
-async function iniciar() {
+async function ejecutarPrograma() {
     while (true) {
-        mostrarMenu();
-        const opcion = await preguntar('Seleccione una opción: ');
+        presentarOpciones();
+        const eleccion = await solicitarDato('Ingrese el número de opción: ');
 
-        switch (opcion) {
+        switch (eleccion) {
             case '1':
-                await agregarLibro();
+                await registrarLibro();
                 break;
             case '2':
-                mostrarCatalogo();
+                exhibirColeccion();
                 break;
             case '3':
-                await buscarLibroPorTitulo();
+                await localizarLibro();
                 break;
             case '4':
-                await eliminarLibro();
+                await removerLibro();
                 break;
             case '5':
-                verEstadisticas();
+                calcularMetricas();
                 break;
             case '6':
-                await ordenarLibros();
+                await reorganizarColeccion();
                 break;
             case '7':
-                await editarLibro();
+                await actualizarRegistro();
                 break;
             case '8':
-                guardarCatalogo();
-                console.log(chalk.red('¡Hasta luego!'));
-                rl.close();
+                respaldarDatos();
+                console.log(estilos.red('Programa finalizado.'));
+                interfaz.close();
                 return;
             default:
-                console.log(chalk.red('Opción no válida.'));
+                console.log(estilos.red('Selección inválida.'));
         }
     }
 }
 
-iniciar();
+ejecutarPrograma();
 
 
 
